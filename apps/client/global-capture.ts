@@ -2,7 +2,7 @@
 // Uses GetAsyncKeyState (keyboard/mouse buttons), GetCursorPos (mouse movement),
 // and XInputGetState (gamepad) at ~120Hz via setInterval.
 
-import { VK_MAP } from '@inputshare/shared';
+import { VK_MAP } from '../../packages/shared/index';
 import type { BrowserWindow } from 'electron';
 
 // ── Build reverse VK→scan map from shared VK_MAP ───────────────

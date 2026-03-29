@@ -2,8 +2,8 @@
 // renderer handles WebRTC (browser-native RTCPeerConnection).
 // Communication between renderer↔main via Electron IPC.
 
-import { decode, PacketType, encodePong } from '@inputshare/shared';
-import type { Packet, AllowedDevices } from '@inputshare/shared';
+import { decode, PacketType, encodePong } from '../../packages/shared/index';
+import type { Packet, AllowedDevices } from '../../packages/shared/index';
 import { WindowsInjector } from './injector';
 import { GamepadInjector } from './gamepad';
 import { ipcMain, type BrowserWindow } from 'electron';

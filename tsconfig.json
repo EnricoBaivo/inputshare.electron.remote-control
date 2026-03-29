@@ -15,6 +15,7 @@
     }
   },
   "include": [
+    "packages/shared/**/*.ts",
     "apps/host/**/*.ts",
     "apps/client/**/*.ts"
   ],
