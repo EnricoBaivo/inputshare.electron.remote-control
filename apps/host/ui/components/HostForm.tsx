@@ -88,12 +88,11 @@ export function HostForm({
                 <CopyButton text={url} label="server URL" />
               </div>
             ))}
-            {lanUrls.length === 0 && (
-              <div className="connection-value-row">
-                <code className="connection-value">{sigUrl}</code>
-                <CopyButton text={sigUrl} label="server URL" />
-              </div>
-            )}
+            <div className="connection-value-row">
+              <code className="connection-value local-url">{sigUrl}</code>
+              <CopyButton text={sigUrl} label="localhost URL" />
+              <span className="url-tag">local</span>
+            </div>
           </div>
         </div>
 
