@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HostForm } from './components/HostForm';
+import { SunshinePanel } from './components/SunshinePanel';
 import { InputMonitor } from './components/InputMonitor';
 import { useHostWebRTC } from './hooks/useHostWebRTC';
 
@@ -17,6 +18,11 @@ declare global {
       onStartWebRTC(cb: (config: { signalingUrl: string; roomId: string }) => void): void;
       onStopWebRTC(cb: () => void): void;
       onInputViz(cb: (data: any) => void): void;
+      sunshineDetect(): Promise<any>;
+      sunshineStatus(): Promise<any>;
+      sunshineOpenWebUI(): Promise<any>;
+      sunshineStartService(): Promise<any>;
+      sunshineStopService(): Promise<any>;
     };
   }
 }
@@ -98,6 +104,7 @@ export function App() {
         onRoomIdChange={setRoomId} onGuideToggle={setGuideOpen}
         onStart={handleStart} onStop={handleStop}
       />
+      <SunshinePanel />
       <InputMonitor />
     </div>
   );

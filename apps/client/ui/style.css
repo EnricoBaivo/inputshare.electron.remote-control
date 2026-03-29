@@ -101,3 +101,59 @@ body {
   border-style: solid;
   border-color: var(--border);
 }
+
+/* ── Stream Panel ────────────────────────────────────────────── */
+.stream-panel {
+  margin-top: 10px;
+}
+
+.stream-ip-input {
+  margin-top: 6px;
+}
+
+.stream-ip-input input {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+}
+.stream-ip-input input:focus { border-color: var(--accent); }
+
+.pair-section {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.pair-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.pair-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.pair-input-row input {
+  flex: 1;
+  padding: 6px 8px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-align: center;
+  outline: none;
+}
+.pair-input-row input:focus { border-color: var(--accent); }

@@ -25,6 +25,8 @@ export function App() {
   const [activeLabel, setActiveLabel] = useState('Input captured');
   const [globalCaptureMode, setGlobalCaptureMode] = useState(false);
   const [globalCaptureActive, setGlobalCaptureActive] = useState(false);
+  const [hostIp, setHostIp] = useState<string | null>(null);
+  const [signalingUrl, setSignalingUrl] = useState('');
 
   const captureZoneRef = useRef<HTMLDivElement>(null);
   const capRef = useRef(false);
@@ -165,6 +167,15 @@ export function App() {
 
   const handleConnect = useCallback((url: string, room: string) => {
     setConnectDisabled(true);
+    setSignalingUrl(url);
+    // Extract host IP from signaling URL for Moonlight
+    try {
+      const httpUrl = url.replace(/^ws/, 'http');
+      const parsed = new URL(httpUrl);
+      const host = parsed.hostname;
+      if (host !== 'localhost' && host !== '127.0.0.1') setHostIp(host);
+      else setHostIp(null);
+    } catch { setHostIp(null); }
     connect(url, room);
   }, [connect]);
 
@@ -203,6 +214,7 @@ export function App() {
         globalCaptureMode={globalCaptureMode}
         globalCaptureActive={globalCaptureActive}
         onToggleGlobalCapture={toggleGlobalCapture}
+        hostIp={hostIp}
       />
     </div>
   );

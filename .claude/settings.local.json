@@ -68,7 +68,10 @@
       "Bash(taskkill //F //IM \"InputShare Client.exe\")",
       "Bash(taskkill //F //IM node.exe)",
       "Bash(mkdir -p apps/host/lib/vigem-setup)",
-      "Bash(unzip -o ../../../../ViGEmBus_1.22.0_x64_x86_arm64.zip \"*.exe\")"
+      "Bash(unzip -o ../../../../ViGEmBus_1.22.0_x64_x86_arm64.zip \"*.exe\")",
+      "WebSearch",
+      "Bash(find /c/dev/remote-control -name desktopCapturer* -o -name *screenshot* -o -name *screen*)",
+      "Bash(grep -r \"getDisplayMedia\\\\|MediaStream\\\\|RTCRtpSender\\\\|addTrack\" --include=*.ts --include=*.tsx)"
     ]
   }
 }

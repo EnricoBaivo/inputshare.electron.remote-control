@@ -43,4 +43,11 @@ contextBridge.exposeInMainWorld('api', {
   onInputViz: (callback: (data: any) => void) => {
     ipcRenderer.on('input-viz', (_event, data) => callback(data));
   },
+
+  // ── Sunshine ──
+  sunshineDetect: () => ipcRenderer.invoke('sunshine-detect'),
+  sunshineStatus: () => ipcRenderer.invoke('sunshine-status'),
+  sunshineOpenWebUI: () => ipcRenderer.invoke('sunshine-open-webui'),
+  sunshineStartService: () => ipcRenderer.invoke('sunshine-start-service'),
+  sunshineStopService: () => ipcRenderer.invoke('sunshine-stop-service'),
 });

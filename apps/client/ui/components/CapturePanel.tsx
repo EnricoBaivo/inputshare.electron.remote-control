@@ -1,6 +1,7 @@
 import React from 'react';
 import type { LatencyInfo } from '@inputshare/shared';
 import { StatusBar, LatencyDetail } from '@inputshare/ui';
+import { StreamPanel } from './StreamPanel';
 
 interface CapturePanelProps {
   visible: boolean;
@@ -17,6 +18,7 @@ interface CapturePanelProps {
   globalCaptureMode: boolean;
   globalCaptureActive: boolean;
   onToggleGlobalCapture: () => void;
+  hostIp: string | null;
 }
 
 export function CapturePanel({
@@ -24,6 +26,7 @@ export function CapturePanel({
   pointerLocked, capturing, kbActive, captureZoneRef,
   onCaptureClick, onDisconnect,
   globalCaptureMode, globalCaptureActive, onToggleGlobalCapture,
+  hostIp,
 }: CapturePanelProps) {
   const showOverlay = !pointerLocked && !(capturing && !kbActive);
   const showActive = pointerLocked || (capturing && !kbActive);
@@ -66,6 +69,8 @@ export function CapturePanel({
           </div>
         </div>
       )}
+
+      <StreamPanel hostIp={hostIp} visible={visible} />
     </div>
   );
 }

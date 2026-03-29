@@ -2,9 +2,11 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import { HostPeer } from './peer';
 import { startSignalingServer, stopSignalingServer, getLocalIPs } from './signaling';
+import { SunshineManager } from './sunshine';
 
 let mainWindow: BrowserWindow | null = null;
 let peer: HostPeer | null = null;
+const sunshine = new SunshineManager();
 let signalingPort = 3001;
 let signalingIPs: string[] = [];
 
@@ -42,6 +44,7 @@ app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   peer?.stop();
+  sunshine.destroy();
   stopSignalingServer();
   app.quit();
 });
@@ -102,3 +105,11 @@ ipcMain.handle('get-signaling-info', () => {
     lanUrls: signalingIPs.map(ip => `ws://${ip}:${signalingPort}/ws`),
   };
 });
+
+// ── Sunshine IPC handlers ───────────────────────────────────────
+
+ipcMain.handle('sunshine-detect', () => sunshine.detect());
+ipcMain.handle('sunshine-status', () => sunshine.quickStatus());
+ipcMain.handle('sunshine-open-webui', () => { sunshine.openWebUI(); return { ok: true }; });
+ipcMain.handle('sunshine-start-service', () => ({ ok: sunshine.startService() }));
+ipcMain.handle('sunshine-stop-service', () => ({ ok: sunshine.stopService() }));

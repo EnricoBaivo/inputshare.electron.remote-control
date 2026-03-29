@@ -192,6 +192,17 @@ button.primary { flex: 1; }
   font-family: var(--font-mono);
 }
 
+/* ── Sunshine Panel ──────────────────────────────────────────── */
+.sunshine-panel {
+  margin-top: 14px;
+}
+
+.sunshine-hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
 /* ── Input Monitor ───────────────────────────────────────────── */
 .input-monitor {
   margin-top: 14px;

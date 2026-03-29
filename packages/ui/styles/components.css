@@ -257,6 +257,64 @@ button.small { padding: 6px 14px; font-size: 12px; }
 
 .guide-body p { margin: 4px 0; }
 
+/* ── Streaming Status ──────────────────────────────────────────── */
+.streaming-status {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.streaming-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streaming-status-text { font-size: 13px; }
+
+.streaming-install-link {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.streaming-install-link:hover { text-decoration: underline; }
+
+.streaming-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.stream-action-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.stream-action-btn:hover { color: var(--text-primary); border-color: var(--accent); }
+.stream-action-btn:disabled { opacity: 0.4; cursor: default; }
+.stream-action-btn.primary-action { background: var(--accent); color: var(--text-primary); border-color: var(--accent); }
+.stream-action-btn.primary-action:hover { opacity: 0.9; }
+.stream-action-btn.danger-text { color: var(--color-red); }
+.stream-action-btn.danger-text:hover { border-color: var(--color-red); }
+
+.stream-notice {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+.stream-notice.error { color: var(--color-red); }
+.stream-notice.success { color: var(--color-green); }
+
 /* ── kbd ───────────────────────────────────────────────────────── */
 kbd {
   background: var(--bg-secondary);
