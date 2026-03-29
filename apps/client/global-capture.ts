@@ -114,7 +114,8 @@ export interface GlobalCaptureOptions {
 
 export class GlobalCapture {
   private opts: GlobalCaptureOptions;
-  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private pollTimer: ReturnType<typeof setTimeout> | null = null;
+  private pollActive = false;
   private _running = false;
   private _initError: string | null = null;
   private captureKb = true;
@@ -168,14 +169,25 @@ export class GlobalCapture {
       this.prevCursorY = pt.y;
     }
 
-    const intervalMs = Math.round(1000 / (this.opts.pollRateHz ?? 120));
-    this.pollTimer = setInterval(() => this.poll(), intervalMs);
+    this.pollActive = true;
     this._running = true;
+    this.schedulePoll();
+  }
+
+  private schedulePoll(): void {
+    if (!this.pollActive) return;
+    // setImmediate fires on every event loop tick (~1-4ms in Electron)
+    // Much faster than setInterval which is clamped to ~15ms on Windows
+    this.pollTimer = setImmediate(() => {
+      this.poll();
+      this.schedulePoll();
+    }) as any;
   }
 
   stop(): void {
+    this.pollActive = false;
     if (this.pollTimer) {
-      clearInterval(this.pollTimer);
+      clearImmediate(this.pollTimer as any);
       this.pollTimer = null;
     }
     if (this._running) {

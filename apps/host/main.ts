@@ -23,10 +23,9 @@ async function createWindow(): Promise<void> {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, '..', '..', 'ui', 'apps', 'host', 'ui', 'index.html'));
   mainWindow.setMenuBarVisibility(false);
 
-  // Start embedded signaling server
+  // Start embedded signaling server BEFORE loading the page
   try {
     const result = await startSignalingServer(signalingPort);
     signalingPort = result.port;
@@ -35,6 +34,8 @@ async function createWindow(): Promise<void> {
   } catch (e: any) {
     console.warn('Failed to start signaling server:', e.message);
   }
+
+  mainWindow.loadFile(path.join(__dirname, '..', '..', 'ui', 'apps', 'host', 'ui', 'index.html'));
 }
 
 app.whenReady().then(createWindow);
