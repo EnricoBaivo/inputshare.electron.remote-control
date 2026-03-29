@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { StatusBar, FormGroup, DeviceCheckboxes, GuideOverlay } from '@inputshare/ui';
 
 function randomId() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
@@ -29,6 +29,21 @@ interface HostFormProps {
   onStop: () => void;
 }
 
+function CopyButton({ text, label }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [text]);
+  return (
+    <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} title={`Copy ${label || text}`}>
+      {copied ? '\u2713' : '\u2398'}
+    </button>
+  );
+}
+
 export function HostForm({
   hosting, statusText, statusColor, gpStatus, latStatus,
   kbChecked, gpChecked, roomId, guideOpen, signalingInfo,
@@ -36,6 +51,17 @@ export function HostForm({
   onStart, onStop,
 }: HostFormProps) {
   const sigUrl = signalingInfo?.localUrl || 'ws://localhost:3001/ws';
+  const lanUrls = signalingInfo?.lanUrls || [];
+  const primaryLanUrl = lanUrls[0] || sigUrl;
+
+  const [allCopied, setAllCopied] = useState(false);
+  const copyAll = useCallback(() => {
+    const text = `Server: ${primaryLanUrl}\nRoom ID: ${roomId}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setAllCopied(true);
+      setTimeout(() => setAllCopied(false), 1500);
+    });
+  }, [primaryLanUrl, roomId]);
 
   return (
     <>
@@ -44,25 +70,46 @@ export function HostForm({
         <button className="btn-icon" title="Setup guide" onClick={() => onGuideToggle(true)}>?</button>
       </div>
 
-      <FormGroup label="Signaling Server (built-in)">
-        <div className="signaling-info">
-          <div className="signaling-url">{sigUrl}</div>
-          {signalingInfo && signalingInfo.lanUrls.length > 0 && (
-            <div className="signaling-lan">
-              LAN: {signalingInfo.lanUrls.map((url, i) => (
-                <span key={i} className="lan-url">{url}</span>
-              ))}
-            </div>
-          )}
+      {/* ── Connection Info Card ── */}
+      <div className="connection-card">
+        <div className="connection-header">
+          <span className="connection-title">Connection Info</span>
+          <button className={`copy-all-btn ${allCopied ? 'copied' : ''}`} onClick={copyAll}>
+            {allCopied ? 'Copied!' : 'Copy All'}
+          </button>
         </div>
-      </FormGroup>
 
-      <FormGroup label="Room ID">
-        <div className="room-row">
-          <input type="text" value={roomId} onChange={e => onRoomIdChange(e.target.value)} spellCheck={false} disabled={hosting} />
-          <button onClick={() => onRoomIdChange(randomId())} disabled={hosting} title="Generate random ID">&#x21bb;</button>
+        <div className="connection-row">
+          <span className="connection-label">Server</span>
+          <div className="connection-values">
+            {lanUrls.map((url, i) => (
+              <div key={i} className="connection-value-row">
+                <code className="connection-value">{url}</code>
+                <CopyButton text={url} label="server URL" />
+              </div>
+            ))}
+            {lanUrls.length === 0 && (
+              <div className="connection-value-row">
+                <code className="connection-value">{sigUrl}</code>
+                <CopyButton text={sigUrl} label="server URL" />
+              </div>
+            )}
+          </div>
         </div>
-      </FormGroup>
+
+        <div className="connection-row">
+          <span className="connection-label">Room ID</span>
+          <div className="connection-values">
+            <div className="connection-value-row">
+              <code className="connection-value room-id-value">{roomId}</code>
+              <CopyButton text={roomId} label="room ID" />
+              <button className="refresh-btn" onClick={() => onRoomIdChange(randomId())} disabled={hosting} title="Generate new ID">&#x21bb;</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="connection-hint">Share the server URL and room ID with the client to connect</div>
+      </div>
 
       <FormGroup label="Allowed Input Devices">
         <DeviceCheckboxes
@@ -86,17 +133,13 @@ export function HostForm({
           <section><h3>Quick start</h3>
             <ol>
               <li>The signaling server starts automatically with the host</li>
-              <li>Share the <strong>LAN URL</strong> and <strong>Room ID</strong> with the client</li>
+              <li>Click <strong>Copy All</strong> to copy server URL + room ID</li>
               <li>Click <strong>Start Hosting</strong></li>
-              <li>On the client, enter the LAN URL and Room ID, then connect</li>
+              <li>On the client, paste the connection info and connect</li>
             </ol>
           </section>
           <section><h3>Gamepad support (optional)</h3>
-            <ol>
-              <li>Install the <strong>ViGEmBus driver</strong> from the Nefarius GitHub releases page</li>
-              <li>Reboot after installation</li>
-              <li>Place <code>ViGEmClient.dll</code> in <code>apps/host/lib/</code></li>
-            </ol>
+            <p>The ViGEmBus driver installs automatically on first run. If it fails, install manually from the Nefarius GitHub releases page and reboot.</p>
           </section>
           <section><h3>How it works</h3>
             <p>The client captures input and streams it over WebRTC. This host injects it into Windows via <code>SendInput()</code> and ViGEm (virtual Xbox 360 controller).</p>
