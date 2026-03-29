@@ -2,18 +2,26 @@
   "appId": "dev.inputshare.client",
   "productName": "InputShare Client",
   "directories": {
-    "output": "../../dist-pack/client"
+    "output": "dist-pack/client"
   },
   "files": [
-    "apps/client/**/*",
-    "packages/shared/**/*",
+    "dist/apps/client/**/*",
+    "dist/packages/shared/**/*",
+    "dist/ui/apps/client/**/*",
+    "dist/ui/assets/**/*",
+    "packages/shared/dist/**/*",
     "package.json"
   ],
+  "extraMetadata": {
+    "main": "dist/apps/client/main.js"
+  },
   "win": {
     "target": "nsis"
   },
   "nsis": {
-    "oneClick": true,
-    "allowToChangeInstallationDirectory": false
-  }
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": false
+  },
+  "asar": true
 }

@@ -2,11 +2,16 @@
   "appId": "dev.inputshare.host",
   "productName": "InputShare Host",
   "directories": {
-    "output": "../../dist-pack/host"
+    "output": "dist-pack/host"
   },
   "files": [
-    "apps/host/**/*",
-    "packages/shared/**/*",
+    "dist/apps/host/**/*",
+    "dist/packages/shared/**/*",
+    "dist/ui/apps/host/**/*",
+    "dist/ui/assets/**/*",
+    "packages/shared/dist/**/*",
+    "node_modules/ws/**/*",
+    "node_modules/koffi/**/*",
     "package.json"
   ],
   "extraResources": [
@@ -15,11 +20,20 @@
       "to": "lib/ViGEmClient.dll"
     }
   ],
+  "extraMetadata": {
+    "main": "dist/apps/host/main.js"
+  },
   "win": {
     "target": "nsis"
   },
   "nsis": {
-    "oneClick": true,
-    "allowToChangeInstallationDirectory": false
-  }
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": false
+  },
+  "asar": true,
+  "asarUnpack": [
+    "node_modules/koffi/**/*",
+    "**/*.dll"
+  ]
 }
