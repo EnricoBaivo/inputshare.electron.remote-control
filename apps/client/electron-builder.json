@@ -1,0 +1,19 @@
+{
+  "appId": "dev.inputshare.client",
+  "productName": "InputShare Client",
+  "directories": {
+    "output": "../../dist-pack/client"
+  },
+  "files": [
+    "apps/client/**/*",
+    "packages/shared/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": "nsis"
+  },
+  "nsis": {
+    "oneClick": true,
+    "allowToChangeInstallationDirectory": false
+  }
+}

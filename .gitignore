@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-pack/
+out/
+*.exe
+*.log
+.env
+test_*.js
+*_test.dll
+vite.config.ts.timestamp*
+ViGEmBus_1.22.0_x64_x86_arm64.zip

@@ -1,0 +1,25 @@
+{
+  "appId": "dev.inputshare.host",
+  "productName": "InputShare Host",
+  "directories": {
+    "output": "../../dist-pack/host"
+  },
+  "files": [
+    "apps/host/**/*",
+    "packages/shared/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "apps/host/lib/ViGEmClient.dll",
+      "to": "lib/ViGEmClient.dll"
+    }
+  ],
+  "win": {
+    "target": "nsis"
+  },
+  "nsis": {
+    "oneClick": true,
+    "allowToChangeInstallationDirectory": false
+  }
+}

@@ -1,0 +1,39 @@
+/* ── CSS Custom Properties (theme) ────────────────────────────── */
+:root {
+  --accent: #53a8f8;
+  --accent-hover: #3d8ad8;
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-deep: #0f3460;
+  --bg-darkest: #0d1b36;
+  --border: #333;
+  --text-primary: #fff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --color-green: #4caf50;
+  --color-yellow: #f0c040;
+  --color-red: #e94560;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  height: 100vh;
+}
+
+/* ── Typography ────────────────────────────────────────────────── */
+h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+/* ── Hidden utility ────────────────────────────────────────────── */
+.hidden { display: none !important; }

@@ -1,0 +1,11 @@
+{
+  "name": "@inputshare/host",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@inputshare/shared": "workspace:*",
+    "@inputshare/ui": "workspace:*",
+    "electron": "^33.0.0",
+    "koffi": "^2.15.2"
+  }
+}
