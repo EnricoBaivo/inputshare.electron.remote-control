@@ -63,7 +63,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(taskkill //F //IM \"InputShare Host.exe\")",
+      "Bash(taskkill //F //IM \"InputShare Client.exe\")",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(mkdir -p apps/host/lib/vigem-setup)",
+      "Bash(unzip -o ../../../../ViGEmBus_1.22.0_x64_x86_arm64.zip \"*.exe\")"
     ]
   }
 }

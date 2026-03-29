@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 // ── VIGEM_ERROR codes ───────────────────────────────────────────
 const VIGEM_ERROR_NONE                 = 0x20000000;
@@ -43,13 +44,27 @@ const XUSB_BUTTON: Record<number, number> = {
 };
 
 // ── Locate ViGEmClient.dll ──────────────────────────────────────
+function getResourcesPath(): string {
+  // In packaged app: process.resourcesPath points to <install>/resources/
+  // In dev: fall back to project root
+  try {
+    const rp = (process as any).resourcesPath;
+    if (rp && fs.existsSync(rp)) return rp;
+  } catch {}
+  return process.cwd();
+}
+
 function findViGEmDll(): string | null {
-  // Use process.cwd() as the project root (more reliable than __dirname in dist/)
   const projectRoot = process.cwd();
+  const resourcesPath = getResourcesPath();
   const candidates = [
+    // Packaged app: extraResources puts DLL in resources/lib/
+    path.join(resourcesPath, 'lib', 'ViGEmClient.dll'),
+    // Dev: project root
     path.join(projectRoot, 'apps', 'host', 'lib', 'ViGEmClient.dll'),
     path.join(__dirname, '..', '..', '..', 'apps', 'host', 'lib', 'ViGEmClient.dll'),
     path.join(__dirname, 'lib', 'ViGEmClient.dll'),
+    // System-wide installs
     'C:\\Program Files\\Nefarius Software Solutions e.U.\\ViGEmBus\\x64\\ViGEmClient.dll',
     'C:\\Program Files\\Nefarius Software Solutions\\ViGEm Bus Driver\\x64\\ViGEmClient.dll',
     'C:\\Program Files\\ViGEmBus\\x64\\ViGEmClient.dll',
@@ -65,6 +80,20 @@ function findViGEmDll(): string | null {
     } catch {}
   }
 
+  return null;
+}
+
+// ── Locate ViGEmBus installer ───────────────────────────────────
+function findViGEmInstaller(): string | null {
+  const resourcesPath = getResourcesPath();
+  const projectRoot = process.cwd();
+  const candidates = [
+    path.join(resourcesPath, 'vigem-setup', 'ViGEmBus_1.22.0_x64_x86_arm64.exe'),
+    path.join(projectRoot, 'apps', 'host', 'lib', 'vigem-setup', 'ViGEmBus_1.22.0_x64_x86_arm64.exe'),
+  ];
+  for (const p of candidates) {
+    try { if (fs.existsSync(p)) return p; } catch {}
+  }
   return null;
 }
 
@@ -153,7 +182,14 @@ export class GamepadInjector {
         return false;
       }
 
-      const err: number = vigem_connect(this.client);
+      let err: number = vigem_connect(this.client);
+      if (err === VIGEM_ERROR_BUS_NOT_FOUND) {
+        // Try auto-installing ViGEmBus driver
+        const installed = this.tryInstallViGEmBus();
+        if (installed) {
+          err = vigem_connect(this.client);
+        }
+      }
       if (err !== VIGEM_ERROR_NONE) {
         this._initError = vigemErrorString(err);
         vigem_free(this.client);
@@ -168,6 +204,24 @@ export class GamepadInjector {
       this._initError = e.message;
       console.warn('ViGEm init failed:', e.message);
       console.warn('Gamepad injection will be disabled.');
+      return false;
+    }
+  }
+
+  private tryInstallViGEmBus(): boolean {
+    const installer = findViGEmInstaller();
+    if (!installer) {
+      console.warn('ViGEmBus installer not found, cannot auto-install');
+      return false;
+    }
+    console.log('ViGEmBus driver not found — attempting auto-install...');
+    try {
+      // Run the installer silently with elevation
+      execSync(`"${installer}" /quiet /norestart`, { timeout: 60000 });
+      console.log('ViGEmBus driver installed successfully');
+      return true;
+    } catch (e: any) {
+      console.warn('ViGEmBus auto-install failed:', e.message);
       return false;
     }
   }

@@ -80,8 +80,8 @@ export async function startSignalingServer(port: number = 3001): Promise<{ port:
         ws.send(JSON.stringify({ type: 'peer-joined', role: otherRole }));
       }
 
-      // Relay messages
-      ws.on('message', (message) => {
+      // Relay messages — ws delivers all data as Buffer; use isBinary to preserve frame type
+      ws.on('message', (message, isBinary) => {
         const info = wsToRoom.get(ws);
         if (!info) return;
         const s = rooms.get(info.room);
@@ -89,10 +89,11 @@ export async function startSignalingServer(port: number = 3001): Promise<{ port:
         const oRole: Role = info.role === 'host' ? 'client' : 'host';
         const o = s[oRole];
         if (o && o.readyState === 1) {
-          // Forward as-is (string or binary)
-          if (Buffer.isBuffer(message)) o.send(message);
-          else if (message instanceof ArrayBuffer) o.send(message);
-          else o.send(message.toString());
+          if (isBinary) {
+            o.send(message);
+          } else {
+            o.send(message.toString());
+          }
         }
       });
 
