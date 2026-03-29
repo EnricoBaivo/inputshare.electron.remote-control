@@ -32,20 +32,47 @@ export function getLocalIPs(): string[] {
   return ips;
 }
 
+async function tryListen(server: ReturnType<typeof createServer>, port: number, maxRetries: number = 5): Promise<number> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const tryPort = port + attempt;
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const onError = (err: any) => {
+          server.removeListener('error', onError);
+          if (err.code === 'EADDRINUSE') reject(err);
+          else reject(err);
+        };
+        server.on('error', onError);
+        server.listen(tryPort, '0.0.0.0', () => {
+          server.removeListener('error', onError);
+          resolve();
+        });
+      });
+      return tryPort;
+    } catch (e: any) {
+      if (e.code === 'EADDRINUSE') {
+        console.warn(`[signaling] Port ${tryPort} in use, trying ${tryPort + 1}...`);
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw new Error(`All ports ${port}-${port + maxRetries - 1} are in use`);
+}
+
 export async function startSignalingServer(port: number = 3001): Promise<{ port: number; ips: string[] }> {
   // Dynamic import ws (CommonJS module)
   const { WebSocketServer } = await import('ws');
 
-  return new Promise((resolve, reject) => {
-    httpServer = createServer((req, res) => {
-      if (req.url === '/health') {
-        res.writeHead(200); res.end('ok');
-      } else {
-        res.writeHead(200); res.end('InputShare Signaling Server');
-      }
-    });
+  httpServer = createServer((req, res) => {
+    if (req.url === '/health') {
+      res.writeHead(200); res.end('ok');
+    } else {
+      res.writeHead(200); res.end('InputShare Signaling Server');
+    }
+  });
 
-    wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
     wss.on('connection', (ws, req) => {
       const parsed = url.parse(req.url || '', true);
@@ -115,24 +142,36 @@ export async function startSignalingServer(port: number = 3001): Promise<{ port:
       });
     });
 
-    httpServer.on('error', reject);
-    httpServer.listen(port, '0.0.0.0', () => {
-      const ips = getLocalIPs();
-      console.log(`[signaling] Signaling server running on port ${port}`);
-      ips.forEach(ip => console.log(`[signaling]   ws://${ip}:${port}/ws`));
-      resolve({ port, ips });
-    });
-  });
+  const actualPort = await tryListen(httpServer, port);
+  const ips = getLocalIPs();
+  console.log(`[signaling] Signaling server running on port ${actualPort}`);
+  ips.forEach(ip => console.log(`[signaling]   ws://${ip}:${actualPort}/ws`));
+  return { port: actualPort, ips };
 }
 
 export function stopSignalingServer(): void {
-  // Close all connections
+  // Close all WebSocket connections
   for (const [ws] of wsToRoom) {
-    try { ws.close(); } catch {}
+    try { ws.terminate(); } catch {}
   }
   rooms.clear();
   wsToRoom.clear();
 
-  if (wss) { try { wss.close(); } catch {} wss = null; }
-  if (httpServer) { try { httpServer.close(); } catch {} httpServer = null; }
+  // Close WebSocket server (terminates all remaining clients)
+  if (wss) {
+    try {
+      for (const client of wss.clients) {
+        try { client.terminate(); } catch {}
+      }
+      wss.close();
+    } catch {}
+    wss = null;
+  }
+
+  // Force-close HTTP server and all open sockets
+  if (httpServer) {
+    try { httpServer.closeAllConnections(); } catch {}
+    try { httpServer.close(); } catch {}
+    httpServer = null;
+  }
 }

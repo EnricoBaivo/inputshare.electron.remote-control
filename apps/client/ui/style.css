@@ -107,8 +107,16 @@ body {
   margin-top: 10px;
 }
 
+.stream-controls {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .stream-ip-input {
-  margin-top: 6px;
+  margin-bottom: 8px;
 }
 
 .stream-ip-input input {
@@ -123,6 +131,66 @@ body {
   outline: none;
 }
 .stream-ip-input input:focus { border-color: var(--accent); }
+
+/* ── App Selector ─────────────────────────────────────────────── */
+.app-selector {
+  margin-top: 8px;
+}
+
+.app-selector-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.app-selector-row {
+  display: flex;
+  gap: 6px;
+}
+
+.app-selector-row select {
+  flex: 1;
+  padding: 6px 8px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.app-selector-row select:focus { border-color: var(--accent); }
+.app-selector-row select:disabled { opacity: 0.5; }
+
+.stream-launch {
+  margin-top: 8px;
+}
+
+.stream-start-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.stream-start-btn:hover { opacity: 0.9; }
 
 .pair-section {
   margin-top: 8px;

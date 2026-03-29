@@ -98,7 +98,10 @@ export class SunshineManager {
 
   startService(): boolean {
     try {
-      execSync('sc start SunshineService', { timeout: 10000 });
+      // Use PowerShell to elevate via UAC
+      execSync('powershell -Command "Start-Process sc -ArgumentList \'start SunshineService\' -Verb RunAs -Wait"', {
+        timeout: 15000, windowsHide: true,
+      });
       return true;
     } catch {
       return false;
@@ -107,7 +110,9 @@ export class SunshineManager {
 
   stopService(): boolean {
     try {
-      execSync('sc stop SunshineService', { timeout: 10000 });
+      execSync('powershell -Command "Start-Process sc -ArgumentList \'stop SunshineService\' -Verb RunAs -Wait"', {
+        timeout: 15000, windowsHide: true,
+      });
       return true;
     } catch {
       return false;

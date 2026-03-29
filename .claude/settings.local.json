@@ -71,7 +71,12 @@
       "Bash(unzip -o ../../../../ViGEmBus_1.22.0_x64_x86_arm64.zip \"*.exe\")",
       "WebSearch",
       "Bash(find /c/dev/remote-control -name desktopCapturer* -o -name *screenshot* -o -name *screen*)",
-      "Bash(grep -r \"getDisplayMedia\\\\|MediaStream\\\\|RTCRtpSender\\\\|addTrack\" --include=*.ts --include=*.tsx)"
+      "Bash(grep -r \"getDisplayMedia\\\\|MediaStream\\\\|RTCRtpSender\\\\|addTrack\" --include=*.ts --include=*.tsx)",
+      "Bash(tasklist //FI \"IMAGENAME eq electron.exe\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr 3001)",
+      "Bash(findstr \"LISTEN\")",
+      "Bash(taskkill:*)"
     ]
   }
 }

@@ -20,6 +20,9 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
   const [pin, setPin] = useState('');
   const [manualIp, setManualIp] = useState('');
   const [exitCode, setExitCode] = useState<number | null>(null);
+  const [apps, setApps] = useState<string[]>([]);
+  const [selectedApp, setSelectedApp] = useState('Desktop');
+  const [loadingApps, setLoadingApps] = useState(false);
 
   const effectiveIp = hostIp || manualIp || null;
   const api = (window as any).api;
@@ -27,6 +30,20 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
   useEffect(() => {
     api.moonlightDetect().then(setStatus);
   }, []);
+
+  // Fetch available apps when we have an IP and Moonlight is installed
+  useEffect(() => {
+    if (!effectiveIp || !status?.installed) return;
+    setLoadingApps(true);
+    api.moonlightListApps(effectiveIp).then((list: string[]) => {
+      setApps(list.length > 0 ? list : ['Desktop']);
+      if (list.length > 0 && !list.includes(selectedApp)) setSelectedApp(list[0]);
+      setLoadingApps(false);
+    }).catch(() => {
+      setApps(['Desktop']);
+      setLoadingApps(false);
+    });
+  }, [effectiveIp, status?.installed]);
 
   useEffect(() => {
     api.onMoonlightProcessExit((code: number | null) => {
@@ -55,9 +72,9 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
   const handleStream = useCallback(async () => {
     if (!effectiveIp) return;
     setExitCode(null);
-    const result = await api.moonlightStream(effectiveIp, 'Desktop');
+    const result = await api.moonlightStream(effectiveIp, selectedApp);
     if (result.ok) setStreaming(true);
-  }, [effectiveIp]);
+  }, [effectiveIp, selectedApp]);
 
   const handleStop = useCallback(async () => {
     await api.moonlightStop();
@@ -78,6 +95,15 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
     setPairingState('pairing');
   }, [pin]);
 
+  const refreshApps = useCallback(() => {
+    if (!effectiveIp) return;
+    setLoadingApps(true);
+    api.moonlightListApps(effectiveIp).then((list: string[]) => {
+      setApps(list.length > 0 ? list : ['Desktop']);
+      setLoadingApps(false);
+    }).catch(() => setLoadingApps(false));
+  }, [effectiveIp]);
+
   if (!visible || !status) return null;
 
   return (
@@ -88,11 +114,6 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
         running={streaming}
         installUrl="https://github.com/moonlight-stream/moonlight-qt/releases"
       >
-        {status.installed && !streaming && effectiveIp && pairingState === 'idle' && (
-          <button className="stream-action-btn primary-action" onClick={handleStream}>
-            Start Video Stream
-          </button>
-        )}
         {streaming && (
           <button className="stream-action-btn danger-text" onClick={handleStop}>
             Stop Video Stream
@@ -100,21 +121,55 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
         )}
       </StreamingStatus>
 
-      {/* No host IP — manual entry */}
-      {!hostIp && status.installed && (
-        <div className="stream-ip-input">
-          <input
-            type="text" value={manualIp}
-            onChange={e => setManualIp(e.target.value)}
-            placeholder="Enter host LAN IP (e.g. 192.168.1.5)"
-            spellCheck={false}
-          />
-        </div>
-      )}
+      {status.installed && !streaming && (
+        <div className="stream-controls">
+          {/* Host IP — manual entry if not auto-detected */}
+          {!hostIp && (
+            <div className="stream-ip-input">
+              <label className="app-selector-label">Host IP for Moonlight</label>
+              <input
+                type="text" value={manualIp}
+                onChange={e => setManualIp(e.target.value)}
+                placeholder="Enter host LAN IP (e.g. 192.168.1.5)"
+                spellCheck={false}
+              />
+            </div>
+          )}
 
-      {/* Exit code notice */}
-      {exitCode !== null && exitCode !== 0 && !streaming && (
-        <div className="stream-notice error">Stream ended (exit code {exitCode}). It may need pairing.</div>
+          {/* App selector + Start button */}
+          {effectiveIp && pairingState === 'idle' && (
+            <>
+              {apps.length > 0 && (
+                <div className="app-selector">
+                  <label className="app-selector-label">Stream App</label>
+                  <div className="app-selector-row">
+                    <select value={selectedApp} onChange={e => setSelectedApp(e.target.value)} disabled={loadingApps}>
+                      {apps.map(app => <option key={app} value={app}>{app}</option>)}
+                    </select>
+                    <button className="stream-action-btn" onClick={refreshApps} disabled={loadingApps} title="Refresh app list">&#x21bb;</button>
+                  </div>
+                </div>
+              )}
+              <button className="stream-start-btn" onClick={handleStream}>
+                {loadingApps ? 'Loading...' : `Stream ${selectedApp}`}
+              </button>
+            </>
+          )}
+
+          {!effectiveIp && (
+            <div className="stream-notice">Enter the host's LAN IP above to start streaming</div>
+          )}
+
+          {/* Exit code notice */}
+          {exitCode !== null && exitCode !== 0 && (
+            <div className="stream-notice error">Stream ended (exit code {exitCode}). It may need pairing.</div>
+          )}
+
+          {/* Pair button */}
+          {pairingState === 'idle' && effectiveIp && exitCode !== null && (
+            <button className="stream-action-btn" onClick={handlePair} style={{ marginTop: 6 }}>Pair with Host</button>
+          )}
+        </div>
       )}
 
       {/* Pairing flow */}
@@ -134,9 +189,6 @@ export function StreamPanel({ hostIp, visible }: StreamPanelProps) {
           Pairing failed: {pairError}
           <button className="stream-action-btn" onClick={() => setPairingState('idle')} style={{ marginLeft: 8 }}>Retry</button>
         </div>
-      )}
-      {pairingState === 'idle' && status.installed && effectiveIp && !streaming && exitCode !== null && (
-        <button className="stream-action-btn" onClick={handlePair}>Pair with Host</button>
       )}
     </div>
   );

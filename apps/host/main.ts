@@ -49,6 +49,11 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+// Force exit if quit doesn't complete (e.g. lingering sockets)
+app.on('will-quit', () => {
+  setTimeout(() => process.exit(0), 1000);
+});
+
 // ── IPC handlers ────────────────────────────────────────────────
 
 ipcMain.handle('start-host', async (_event, { signalingUrl, roomId, devices }) => {
