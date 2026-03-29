@@ -1,0 +1,76 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Rebuild koffi for Electron
+        run: npx @electron/rebuild -f -w koffi
+
+      - name: Build TypeScript & UI
+        run: |
+          npx tsc -p packages/shared/tsconfig.json
+          npx tsc
+          npx vite build
+
+      - name: Package Host installer
+        run: npx electron-builder --config apps/host/electron-builder.json --win --publish never
+
+      - name: Package Client installer
+        run: npx electron-builder --config apps/client/electron-builder.json --win --publish never
+
+      - name: Get version from tag
+        id: version
+        shell: bash
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: InputShare ${{ steps.version.outputs.tag }}
+          body: |
+            ## InputShare ${{ steps.version.outputs.tag }}
+
+            ### Downloads
+
+            | File | Description |
+            |------|-------------|
+            | `InputShare Host Setup *.exe` | Install on the **gaming PC** (receives and injects input) |
+            | `InputShare Client Setup *.exe` | Install on the **control PC** (captures and sends input) |
+
+            ### Quick Start
+            1. Install **Host** on the gaming PC, launch it, click **Start Hosting**
+            2. Install **Client** on the control PC, enter the host's **LAN URL** and **Room ID**
+            3. Click **Connect**, then click the capture zone (or enable Global Capture)
+
+            ### Requirements
+            - Windows 10/11 (x64)
+            - ViGEmBus driver auto-installs on first run (for gamepad support)
+          files: |
+            dist-pack/host/InputShare Host Setup *.exe
+            dist-pack/client/InputShare Client Setup *.exe
+          draft: false
+          prerelease: false
